@@ -9,9 +9,9 @@
 #include "w25x.h"
 #include "st25dv64k.h"
 #include "usb_host.h"
-#include "hwio_pindef.h"
+#include "MarlinPin.hpp"
 
-using namespace buddy::hw;
+static constexpr uint8_t fastboot_pin = MARLIN_PORT_PIN(MARLIN_PORT_C, MARLIN_PIN_NR_7);
 
 int diag_fastboot = 0;
 
@@ -29,14 +29,15 @@ void diag_check_fastboot(void) {
     if (otp_lock_sector0) //not locked
     {
         __HAL_RCC_GPIOC_CLK_ENABLE();
+        gpio_init(fastboot_pin, GPIO_MODE_INPUT, GPIO_PULLUP, GPIO_SPEED_FREQ_VERY_HIGH);
         diag_delay(100000);
         int i;
         for (i = 0; i < 10; i++) {
-            if (fastBoot.read() == Pin::State::high)
+            if (gpio_get(fastboot_pin))
                 break;
             diag_delay(10000);
         }
-        diag_fastboot = ((i == 10) && (fastBoot.read() == Pin::State::low)) ? 1 : 0;
+        diag_fastboot = ((i == 10) && !gpio_get(fastboot_pin)) ? 1 : 0;
     }
 }
 
