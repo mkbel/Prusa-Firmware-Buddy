@@ -42,8 +42,8 @@
 //
 // Limit Switches
 //
-#define X_MIN_PIN              MARLIN_PIN(X_DIAG)
-#define X_MAX_PIN              MARLIN_PIN(X_DIAG)
+#define X_MIN_PIN              MARLIN_PIN(X_ENA)
+#define X_MAX_PIN              MARLIN_PIN(X_ENA)
 #define Y_MIN_PIN              MARLIN_PIN(Y_DIAG)
 #define Y_MAX_PIN              MARLIN_PIN(Y_DIAG)
 #define Z_MIN_PIN              MARLIN_PIN(Z_MIN)
@@ -59,7 +59,7 @@
 
 #define X_STEP_PIN             MARLIN_PIN(X_STEP)
 #define X_DIR_PIN              MARLIN_PIN(X_DIR)
-#define X_ENABLE_PIN           MARLIN_PIN(X_ENA)
+#define X_ENABLE_PIN           MARLIN_PIN(X_DIAG)
 
 #define Y_STEP_PIN             MARLIN_PIN(Y_STEP)
 #define Y_DIR_PIN              MARLIN_PIN(Y_DIR)
