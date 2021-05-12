@@ -288,4 +288,7 @@ public:
 private:
     const OutputInputPin &m_outputInputPin;
 };
+
+bool physicalPinExist(uint32_t marlinPin);
+bool isOutputPin(uint32_t marlinPin);
 } // namespace buddy::hw

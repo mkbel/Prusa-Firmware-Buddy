@@ -5,7 +5,10 @@
  */
 
 #include "Pin.hpp"
-using namespace buddy::hw;
+#include "hwio_pindef.h"
+#include <type_traits>
+
+namespace buddy::hw {
 
 void InputPin::configure(Pull pull) const {
     GPIO_InitTypeDef GPIO_InitStruct = { 0 };
@@ -31,3 +34,32 @@ void OutputInputPin::enableInput(Pull pull) const {
     GPIO_InitStruct.Pull = static_cast<uint32_t>(pull);
     HAL_GPIO_Init(getHalPort(), &GPIO_InitStruct);
 }
+
+static constexpr uint32_t toMarlinPin(IoPort port, IoPin pin) {
+    return (16 * static_cast<uint32_t>(port) + static_cast<uint32_t>(pin));
+}
+
+bool physicalPinExist(uint32_t marlinPin) {
+#define ALL_PHYSICAL_PINS(TYPE, NAME, PORTPIN, PARAMETERS) case toMarlinPin(PORTPIN):
+    switch (marlinPin) {
+        PIN_TABLE(ALL_PHYSICAL_PINS)
+        return true;
+    default:
+        return false;
+    }
+#undef ALL_PHYSICAL_PINS
+}
+
+bool isOutputPin(uint32_t marlinPin) {
+#define ALL_OUTPUT_PINS(TYPE, NAME, PORTPIN, PARAMETERS) \
+    case toMarlinPin(PORTPIN):                           \
+        return (std::is_same_v<TYPE, OutputPin>);
+    switch (marlinPin) {
+        PIN_TABLE(ALL_OUTPUT_PINS)
+    default:
+        return false;
+    }
+#undef ALL_OUTPUT_PINS
+}
+
+} //namespace buddy::hw
