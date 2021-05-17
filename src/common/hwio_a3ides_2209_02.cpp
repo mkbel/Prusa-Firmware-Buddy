@@ -20,6 +20,7 @@
 #include "main.h"
 #include "fanctl.h"
 #include "MarlinPin.hpp"
+#include "hwio_pindef.h"
 
 /**
  * @brief hwio Marlin wrapper errors
@@ -642,6 +643,9 @@ void digitalWrite(uint32_t marlinPin, uint32_t ulVal) {
         _hwio_pwm_analogWrite_set_val(HWIO_PWM_FAN, ulVal ? _pwm_analogWrite_max[HWIO_PWM_FAN] : 0);
 #endif //NEW_FANCTL
         return;
+    case MARLIN_PIN(X_DIR):
+        buddy::hw::EspRst.write(static_cast<buddy::hw::Pin::State>(ulVal));
+        //no break
     default:
 #if _DEBUG
         if (!buddy::hw::isOutputPin(marlinPin)) {
