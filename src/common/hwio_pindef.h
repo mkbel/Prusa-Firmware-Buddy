@@ -91,7 +91,7 @@
             MACRO_FUNCTION(buddy::hw::OutputPin, yEnable, BUDDY_PIN(Y_ENA), Pin::State::high COMMA OMode::pushPull COMMA OSpeed::low)                                        \
             MACRO_FUNCTION(buddy::hw::OutputPin, displayCs, buddy::hw::IoPort::C COMMA buddy::hw::IoPin::p9, Pin::State::high COMMA OMode::pushPull COMMA OSpeed::high)      \
             MACRO_FUNCTION(buddy::hw::OutputPin, displayRs, buddy::hw::IoPort::D COMMA buddy::hw::IoPin::p11, Pin::State::high COMMA OMode::pushPull COMMA OSpeed::high)     \
-            MACRO_FUNCTION(buddy::hw::OutputPin, EspRst, buddy::hw::IoPort::C COMMA buddy::hw::IoPin::p13, Pin::State::high COMMA OMode::pushPull COMMA OSpeed::high)        \
+            MACRO_FUNCTION(buddy::hw::OutputPin, EspRst, buddy::hw::IoPort::C COMMA buddy::hw::IoPin::p9, Pin::State::high COMMA OMode::pushPull COMMA OSpeed::high)         \
             MACRO_FUNCTION(buddy::hw::OutputInputPin, displayRst, buddy::hw::IoPort::C COMMA buddy::hw::IoPin::p8, Pin::State::high COMMA OMode::pushPull COMMA OSpeed::low) \
             MACRO_FUNCTION(buddy::hw::InputPin, jogWheelEN1, buddy::hw::IoPort::E COMMA buddy::hw::IoPin::p15, IMode::input COMMA Pull::up)                                  \
             MACRO_FUNCTION(buddy::hw::InputPin, jogWheelEN2, buddy::hw::IoPort::E COMMA buddy::hw::IoPin::p13, IMode::input COMMA Pull::up)
