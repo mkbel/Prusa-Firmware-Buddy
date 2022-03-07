@@ -3,6 +3,7 @@
 #pragma once
 
 #include <inttypes.h>
+#include "metric.h"
 
 //low level I/O classes
 static const uint8_t HWIO_CLS_DI = 0x01;  //class digital input
@@ -37,7 +38,7 @@ extern void hwio_dac_set_val(int i_dac, int val); //write analog output
 
 //pwm outputs
 extern int hwio_pwm_get_cnt(void);                     //number of pwm outputs
-extern int hwio_pwm_get_max(int i_pwm);                //pwm output maximum value
+constexpr int hwio_pwm_get_max(int i_pwm);             //pwm output maximum value
 extern void hwio_pwm_set_val(int i_pwm, uint32_t val); //write pwm output
 
 extern int hwio_pwm_get_val(int i_pwm);                       //get pwm value, returns 0 if stopped
@@ -80,6 +81,8 @@ extern void hwio_beeper_notone(void);
 //cycle 1ms
 extern void hwio_update_1ms(void);
 
+extern metric_t metric_nozzle_pwm;
+extern metric_t metric_bed_pwm;
 #ifdef __cplusplus
 }
 #endif //__cplusplus

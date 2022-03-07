@@ -6,8 +6,18 @@
 #include "gpio.h"
 #include "config.h"
 #include "appmain.hpp"
+#include "assert.h"
 
 using namespace buddy::hw;
+
+static void force_record_metric_zero_integer_and_disable(metric_t &metric) {
+    assert(METRIC_VALUE_INTEGER == metric.type);
+    const uint32_t last_interval = metric.min_interval_ms;
+    metric.min_interval_ms = 0;
+    metric_record_integer(&metric, 0);
+    metric.enabled_handlers = METRIC_HANDLER_DISABLE_ALL;
+    metric.min_interval_ms = last_interval;
+}
 
 //! @brief Put hardware into safe state
 //!
@@ -33,4 +43,7 @@ void hwio_safe_state(void) {
     yEnable.write(Pin::State::high);
     zEnable.write(Pin::State::high);
     e0Enable.write(Pin::State::high);
+
+    force_record_metric_zero_integer_and_disable(metric_nozzle_pwm);
+    force_record_metric_zero_integer_and_disable(metric_bed_pwm);
 }
