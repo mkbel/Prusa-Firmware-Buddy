@@ -128,10 +128,8 @@ void dump_in_xflash_reset(void) {
 }
 
 void dump_in_xflash_delete(void) {
-    if (w25x_init(false)) {
-        for (uint32_t addr = 0; addr < 0x800000; addr += 0x10000) {
-            w25x_block64_erase(DUMP_OFFSET + addr);
-        }
+    for (uint32_t addr = 0; addr < 0x800000; addr += 0x10000) {
+        w25x_block64_erase(DUMP_OFFSET + addr);
     }
 }
 
