@@ -122,10 +122,8 @@ unsigned int dump_in_xflash_read_regs_GEN(void *pRegsGEN, unsigned int size) {
 }
 
 void dump_in_xflash_reset(void) {
-    if (w25x_init(false)) {
-        for (uint32_t addr = 0; addr < DUMP_XFLASH_SIZE; addr += 0x10000) {
-            w25x_block64_erase(DUMP_OFFSET + addr);
-        }
+    for (uint32_t addr = 0; addr < DUMP_XFLASH_SIZE; addr += 0x10000) {
+        w25x_block64_erase(DUMP_OFFSET + addr);
     }
 }
 
