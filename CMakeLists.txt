@@ -745,6 +745,7 @@ target_sources(
           src/marlin_stubs/M50.cpp
           src/marlin_stubs/M505.cpp
           src/hw/buffered_serial.cpp
+          src/hw/mainCheck.cpp
           src/marlin_stubs/M876.cpp
           src/marlin_stubs/G26.cpp
           src/marlin_stubs/G162.cpp
