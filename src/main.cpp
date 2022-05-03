@@ -29,6 +29,7 @@
 #include "adc.hpp"
 #include "SEGGER_SYSVIEW.h"
 #include "logging.h"
+#include "common/timing.h"
 
 #ifdef BUDDY_ENABLE_WUI
     #include "wui.h"

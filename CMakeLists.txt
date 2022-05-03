@@ -735,6 +735,7 @@ target_sources(
           src/common/ini_handler.c
           src/common/z_calibration_fsm.cpp
           src/common/scratch_buffer.cpp
+          src/common/timingCheck.cpp
           src/common/odometer.cpp
           src/common/footer_eeprom.cpp
           $<$<STREQUAL:${PRINTER},MINI>:src/common/minda_broken_cable_detection.cpp>
@@ -745,7 +746,6 @@ target_sources(
           src/marlin_stubs/M50.cpp
           src/marlin_stubs/M505.cpp
           src/hw/buffered_serial.cpp
-          src/hw/mainCheck.cpp
           src/marlin_stubs/M876.cpp
           src/marlin_stubs/G26.cpp
           src/marlin_stubs/G162.cpp

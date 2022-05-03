@@ -4,7 +4,7 @@
  * @file
  */
 
-#include "../../include/main.h"
+#include "timing.h"
 
 static constexpr RCC_OscInitTypeDef RCC_OscTest = [] {
     RCC_OscInitTypeDef rcc_OscInit {};
