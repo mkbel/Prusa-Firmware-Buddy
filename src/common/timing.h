@@ -78,6 +78,9 @@ inline void delay_s(uint32_t s) {
     delay__(ticks_s, s);
 }
 
+#ifdef __cplusplus
+}
+
 /**
  * Busy wait delay cycles routines:
  *
@@ -86,12 +89,12 @@ inline void delay_s(uint32_t s) {
  *  DELAY_US(count): Delay execution in microseconds
  */
 
-#define FORCE_INLINE __attribute__((always_inline)) inline
+    #define FORCE_INLINE __attribute__((always_inline)) inline
 
-#if defined(__arm__) || defined(__thumb__)
+    #if defined(__arm__) || defined(__thumb__)
 
-    #if __CORTEX_M == 7
-        #define PENDING(NOW, SOON) ((int32_t)(NOW - (SOON)) < 0)
+        #if __CORTEX_M == 7
+            #define PENDING(NOW, SOON) ((int32_t)(NOW - (SOON)) < 0)
 
 // Cortex-M7 can use the cycle counter of the DWT unit
 // http://www.anthonyvh.com/2017/05/18/cortex_m-cycle_counter/
@@ -114,27 +117,27 @@ FORCE_INLINE static void timing_delay_cycles(const uint32_t x) {
     }
 }
 
-        #undef PENDING
-    #else
+            #undef PENDING
+        #else
 
-    // https://blueprints.launchpad.net/gcc-arm-embedded/+spec/delay-cycles
+        // https://blueprints.launchpad.net/gcc-arm-embedded/+spec/delay-cycles
 
-        #define nop() __asm__ __volatile__("nop;\n\t" :: \
-                                               :)
+            #define nop() __asm__ __volatile__("nop;\n\t" :: \
+                                                   :)
 
 FORCE_INLINE static void timing_delay_4cycles(uint32_t cy) { // +1 cycle
-        #if ARCH_PIPELINE_RELOAD_CYCLES < 2
-            #define EXTRA_NOP_CYCLES A("nop")
-        #else
-            #define EXTRA_NOP_CYCLES ""
-        #endif
+            #if ARCH_PIPELINE_RELOAD_CYCLES < 2
+                #define EXTRA_NOP_CYCLES " nop\n\t"
+            #else
+                #define EXTRA_NOP_CYCLES ""
+            #endif
 
     __asm__ __volatile__(
-        A(".syntax unified") // is to prevent CM0,CM1 non-unified syntax
-        L("1")
-            A("subs %[cnt],#1")
-                EXTRA_NOP_CYCLES
-                    A("bne 1b")
+        " .syntax unified\n\t" // is to prevent CM0,CM1 non-unified syntax
+        "1:\n\t"
+        " subs %[cnt],#1\n\t" //
+        EXTRA_NOP_CYCLES
+        " bne 1b\n\t"
         : [ cnt ] "+r"(cy) // output: +r means input+output
         :                  // input:
         : "cc"             // clobbers:
@@ -145,7 +148,7 @@ FORCE_INLINE static void timing_delay_4cycles(uint32_t cy) { // +1 cycle
 FORCE_INLINE static void timing_delay_cycles(uint32_t x) {
 
     if (__builtin_constant_p(x)) {
-        #define MAXNOPS 4
+            #define MAXNOPS 4
 
         if (x <= (MAXNOPS)) {
             switch (x) {
@@ -171,25 +174,25 @@ FORCE_INLINE static void timing_delay_cycles(uint32_t x) {
             if ((x = (x - 1) / (MAXNOPS)))
                 timing_delay_4cycles(x); // if need more then 4 nop loop is more optimal
         }
-        #undef MAXNOPS
+            #undef MAXNOPS
     } else if ((x >>= 2))
         timing_delay_4cycles(x);
 }
-        #undef nop
+            #undef nop
 
-    #endif
+        #endif
 
-#elif defined(__AVR__)
+    #elif defined(__AVR__)
 
-    #define nop() __asm__ __volatile__("nop;\n\t" :: \
-                                           :)
+        #define nop() __asm__ __volatile__("nop;\n\t" :: \
+                                               :)
 
 FORCE_INLINE static void timing_delay_4cycles(uint8_t cy) {
     __asm__ __volatile__(
-        L("1")
-            A("dec %[cnt]")
-                A("nop")
-                    A("brne 1b")
+        "1:\n\t"
+        " dec %[cnt]:\n\t"
+        " nop:\n\t"
+        " brne 1b:\n\t"
         : [ cnt ] "+r"(cy) // output: +r means input+output
         :                  // input:
         : "cc"             // clobbers:
@@ -200,7 +203,7 @@ FORCE_INLINE static void timing_delay_4cycles(uint8_t cy) {
 FORCE_INLINE static void timing_delay_cycles(uint16_t x) {
 
     if (__builtin_constant_p(x)) {
-    #define MAXNOPS 4
+        #define MAXNOPS 4
 
         if (x <= (MAXNOPS)) {
             switch (x) {
@@ -227,13 +230,13 @@ FORCE_INLINE static void timing_delay_cycles(uint16_t x) {
                 timing_delay_4cycles(x); // if need more then 4 nop loop is more optimal
         }
 
-    #undef MAXNOPS
+        #undef MAXNOPS
     } else if ((x >>= 2))
         timing_delay_4cycles(x);
 }
-    #undef nop
+        #undef nop
 
-#elif defined(ESP32)
+    #elif defined(ESP32)
 
 FORCE_INLINE static void timing_delay_cycles(uint32_t x) {
     unsigned long ccount, stop;
@@ -249,22 +252,20 @@ FORCE_INLINE static void timing_delay_cycles(uint32_t x) {
     }
 }
 
-#elif defined(__PLAT_LINUX__)
+    #elif defined(__PLAT_LINUX__)
 
-// specified inside platform
+    // specified inside platform
 
-#else
+    #else
 
-    #error "Unsupported MCU architecture"
+        #error "Unsupported MCU architecture"
 
-#endif
+    #endif
 
-// Delay in nanoseconds
-#define DELAY_NS(x) timing_delay_cycles((x) * (ConstexprSystemCoreClock() / 1000000UL) / 1000UL)
+    // Delay in nanoseconds
+    #define DELAY_NS(x) timing_delay_cycles((x) * (ConstexprSystemCoreClock() / 1000000UL) / 1000UL)
 
-// Delay in microseconds
-#define DELAY_US(x) timing_delay_cycles((x) * (ConstexprSystemCoreClock() / 1000000UL))
+    // Delay in microseconds
+    #define DELAY_US(x) timing_delay_cycles((x) * (ConstexprSystemCoreClock() / 1000000UL))
 
-#ifdef __cplusplus
-}
 #endif //__cplusplus
