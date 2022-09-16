@@ -2356,7 +2356,7 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
       #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
         delta_mm_cart
       #else
-        { delta_mm.x, delta_mm.y, delta_mm.z, delta_mm.e }
+        { target_float.x - position_float.x, target_float.y - position_float.y, target_float.z - position_float.z,  target_float.e - position_float.e}
       #endif
     ;
     unit_vec *= inverse_millimeters;
@@ -2376,6 +2376,9 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
       // NOTE: Max junction velocity is computed without sin() or acos() by trig half angle identity.
       float junction_cos_theta = (-prev_unit_vec.x * unit_vec.x) + (-prev_unit_vec.y * unit_vec.y)
                                + (-prev_unit_vec.z * unit_vec.z) + (-prev_unit_vec.e * unit_vec.e);
+      #if ENABLED(JD_DEBUG_OUTPUT)
+        SERIAL_ECHO_F(junction_cos_theta, 7);
+      #endif
 
       // NOTE: Computed without any expensive trig, sin() or acos(), by trig half angle identity of cos(theta).
       if (junction_cos_theta > 0.999999f) {
@@ -2527,6 +2530,11 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
   #endif // Classic Jerk Limiting
 
   // Max entry speed of this block equals the max exit speed of the previous block.
+  #if ENABLED(JD_DEBUG_OUTPUT)
+    SERIAL_ECHO(" ");
+    SERIAL_ECHO(vmax_junction_sqr);
+    SERIAL_EOL();
+  #endif
   block->max_entry_speed_sqr = vmax_junction_sqr;
 
   // Initialize block entry speed. Compute based on deceleration to user-defined MINIMUM_PLANNER_SPEED.
