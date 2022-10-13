@@ -31,6 +31,7 @@
 #include "eeprom.h"
 #include "w25x.h"
 #include "gui_fsensor_api.hpp"
+#include "version.h"
 
 #if ENABLED(RESOURCES)
     #include "resources/bootstrap.hpp"
@@ -187,6 +188,28 @@ static void finish_update() {
 }
 #endif
 
+/**
+ * @brief Bootstrap finished
+ *
+ * Report bootstrap finished and firmware version.
+ * This needs to be called after resources were successfully updated
+ * in xFlash. This also needs to be called even if xFlash / resources
+ * are unused. This needs to be output to USB CDC log destination.
+ * Format of the messages can not be changed as test station
+ * expect those as step in manufacturing process.
+ * The board needs to be able to report this with no additional
+ * dependencies to connected peripherals.
+ *
+ */
+static void manufacture_report() {
+    assert((log_component_t buddy_component = log_component_find("Buddy")) && (buddy_component->lowest_severity <= LOG_SEVERITY_INFO));
+    assert((log_destination_t usb_destination = log_destination_find("USB")) && (usb_destination->lowest_severity <= LOG_SEVERITY_INFO));
+    static_assert(LOG_LOWEST_SEVERITY <= LOG_SEVERITY_INFO, "Mandatory info messages are not logged.");
+
+    log_info(Buddy, "bootstrap finished");
+    log_info(Buddy, "firmware version: %s", project_version_full);
+}
+
 void gui_run(void) {
 #ifdef USE_ST7789
     st7789v_config = st7789v_cfg;
@@ -274,6 +297,7 @@ void gui_run(void) {
 #if ENABLED(RESOURCES)
     finish_update();
 #endif
+    manufacture_report();
 
     marlin_client_set_event_notify(MARLIN_EVT_MSK_DEF, client_gui_refresh);
     marlin_client_set_change_notify(MARLIN_VAR_MSK_DEF, client_gui_refresh);
@@ -287,7 +311,6 @@ void gui_run(void) {
 
     redraw_cmd_t redraw;
 
-    marlin_gcode("M118 E1 bootstrap finished");
     //TODO make some kind of registration
     while (1) {
         gui::StartLoop();
