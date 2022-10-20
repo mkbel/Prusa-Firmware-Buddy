@@ -599,6 +599,10 @@ void analogWrite(uint32_t ulPin, uint32_t ulValue) {
         hwio_arduino_error(HWIO_ERR_UNINI_ANA_WR, ulPin); //error: uninitialized analog write
 }
 
+void analogReadResolution(int res) {
+    // not supported, resolution is fixed
+}
+
 void pinMode(uint32_t ulPin, uint32_t ulMode) {
     // not supported, all pins are configured with Cube
 }
