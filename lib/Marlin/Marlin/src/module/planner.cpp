@@ -3565,7 +3565,7 @@ void Motion_Parameters::save() {
           mp.max_e_jerk[i] = planner.max_e_jerk[i];
         }
       #else
-        mp.max_e_jerk = planner.max_e_jerk;
+        mp.max_e_jerk = planner.max_e_jerk[E_INDEX_N(E)];
       #endif
     #endif
   #endif
@@ -3595,7 +3595,7 @@ void Motion_Parameters::load() {
           planner.max_e_jerk[i] = mp.max_e_jerk[i];
         }
       #else
-        planner.max_e_jerk = mp.max_e_jerk;
+        planner.max_e_jerk[E_INDEX_N(E)] = mp.max_e_jerk;
       #endif
     #endif
   #endif
