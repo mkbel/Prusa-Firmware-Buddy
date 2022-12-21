@@ -732,7 +732,7 @@ float Probe::run_z_probe(const bool sanity_check/*=true*/, const bool single_onl
     if (try_to_probe(PSTR("FAST"), z_probe_low_point, z_probe_fast_mm_s,
                      sanity_check, Z_CLEARANCE_BETWEEN_PROBES) ) {
       #if ENABLED(HALT_ON_PROBING_ERROR)
-        kill("PROBING ERROR", "Could not reach the bed, FAST Probe fail!");
+        kill(F("PROBING ERROR"), F("Could not reach the bed, FAST Probe fail!"));
       #endif
       return NAN;
     }
@@ -777,7 +777,7 @@ float Probe::run_z_probe(const bool sanity_check/*=true*/, const bool single_onl
       if (try_to_probe(PSTR("SLOW"), z_probe_low_point, MMM_TO_MMS(Z_PROBE_FEEDRATE_SLOW),
                        sanity_check, Z_CLEARANCE_MULTI_PROBE) ) {
         #if ENABLED(HALT_ON_PROBING_ERROR)
-          kill("PROBING ERROR", "Could not reach the bed, SLOW Probe fail!");
+          kill(F("PROBING ERROR"), F("Could not reach the bed, SLOW Probe fail!"));
         #endif
         return NAN;
       }
@@ -890,7 +890,7 @@ float Probe::probe_at_point(const_float_t rx, const_float_t ry, const ProbePtRai
   if (!can_reach(npos, probe_relative)) {
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Position Not Reachable");
     #if ENABLED(HALT_ON_PROBING_ERROR)
-      kill("PROBING ERROR", "Could not reach the bed, XY position not within machine coordinates!");
+      kill(F("PROBING ERROR"), F("Could not reach the bed, XY position not within machine coordinates!"));
     #endif
     return NAN;
   }
@@ -924,7 +924,7 @@ float Probe::probe_at_point(const_float_t rx, const_float_t ry, const ProbePtRai
       SERIAL_ERROR_MSG(STR_ERR_PROBING_FAILED);
     #endif
     #if ENABLED(HALT_ON_PROBING_ERROR)
-      kill("PROBING ERROR", "Could not reach the bed, endstop was not triggered!");
+      kill(F("PROBING ERROR"), F("Could not reach the bed, endstop was not triggered!"));
     #endif
   }
   DEBUG_ECHOLNPGM("measured_z: ", measured_z);
