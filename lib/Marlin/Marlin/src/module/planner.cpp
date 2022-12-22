@@ -2691,6 +2691,9 @@ bool Planner::_populate_block(
                                  + (-prev_unit_vec.v * unit_vec.v),
                                  + (-prev_unit_vec.w * unit_vec.w)
                                );
+      #if ENABLED(JD_DEBUG_OUTPUT)
+        SERIAL_ECHO_F(junction_cos_theta, 7);
+      #endif
 
       // NOTE: Computed without any expensive trig, sin() or acos(), by trig half angle identity of cos(theta).
       if (junction_cos_theta > 0.999999f) {
@@ -2924,6 +2927,11 @@ bool Planner::_populate_block(
   #endif // Classic Jerk Limiting
 
   // Max entry speed of this block equals the max exit speed of the previous block.
+  #if ENABLED(JD_DEBUG_OUTPUT)
+    SERIAL_ECHO(" ");
+    SERIAL_ECHO(vmax_junction_sqr);
+    SERIAL_EOL();
+  #endif
   block->max_entry_speed_sqr = vmax_junction_sqr;
 
   // Initialize block entry speed. Compute based on deceleration to user-defined MINIMUM_PLANNER_SPEED.
