@@ -863,7 +863,7 @@
 //#define SENSORLESS_BACKOFF_MM  { 2, 2, 0 }  // (linear=mm, rotational=°) Backoff from endstops before sensorless homing
 
 //kill command after probing fails
-//#define HALT_ON_PROBING_ERROR
+#define HALT_ON_PROBING_ERROR
 //after enabling HOMING_MAX_ATTEMPTS, homing can fail
 #define HOMING_MAX_ATTEMPTS 10
 #ifdef HOMING_MAX_ATTEMPTS
