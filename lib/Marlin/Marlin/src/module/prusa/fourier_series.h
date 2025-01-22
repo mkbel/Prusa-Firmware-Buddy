@@ -15,7 +15,7 @@
  *  * samples being added
  *  * trigonometric function being correlated with
  */
-// #define FOURIER_SERIES_OUTPUT_SAMPLES
+#define FOURIER_SERIES_OUTPUT_SAMPLES
 
 /**
  * @brief Compute single point Fourier transformation
