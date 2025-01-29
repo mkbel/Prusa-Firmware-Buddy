@@ -38,9 +38,9 @@ uint32_t FourierSeries3d::add_sample(const float sample_time, const PrusaAcceler
 #endif
 
 #ifdef FOURIER_SERIES_OUTPUT_SAMPLES
-    constexpr size_t max_len = 40;
+    constexpr size_t max_len = 6 * 3 + 11 * 3 + 5 + 2 + 1; // 59
     char buff[max_len];
-    snprintf(buff, max_len, "%f %f %f\r\n", static_cast<double>(sample.val[0]), static_cast<double>(sample.val[1]), static_cast<double>(sample.val[2]));
+    snprintf(buff, max_len, "%hd %hd %hd %ld %ld %ld\r\n", sample.val[0], sample.val[1], sample.val[2], sample.pos[0], sample.pos[1], sample.pos[2]);
     const uint32_t len = strnlen(buff, max_len);
     const uint32_t written = tud_cdc_n_write(0, buff, len);
     if (written < len) {

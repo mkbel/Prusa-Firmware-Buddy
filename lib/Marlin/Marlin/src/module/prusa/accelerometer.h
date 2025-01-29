@@ -26,7 +26,8 @@ static_assert(HAS_LOCAL_ACCELEROMETER() || HAS_REMOTE_ACCELEROMETER());
 class PrusaAccelerometer {
 public:
     struct Acceleration {
-        float val[3];
+        int16_t val[3];
+        int32_t pos[3];
     };
 
     enum class Error {

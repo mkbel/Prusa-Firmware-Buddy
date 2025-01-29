@@ -1,5 +1,7 @@
 #pragma once
 
+#include "inc/MarlinConfig.h"
+#include "Marlin/src/module/stepper.h"
 #include <tuple>
 #include <optional>
 #include <atomic>
@@ -29,7 +31,17 @@
  * this is much much rarer compared to the observed FIFO issues.
  */
 class LIS2DH12Poller {
-    using Record = std::tuple<int16_t, int16_t, int16_t>;
+    using Record = std::tuple<int16_t, int16_t, int16_t, int32_t, int32_t, int32_t>;
+    struct Position {
+        union {
+            struct {
+                int32_t x;
+                int32_t y;
+                int32_t z;
+            };
+            int32_t pos[3];
+        };
+    };
 
     enum class Request {
         none,
@@ -48,6 +60,10 @@ class LIS2DH12Poller {
     uint8_t dma_buffer[7];
 
     uint32_t start_time = 0;
+
+    Position m_previous_pos;
+    Position m_current_pos;
+
     std::atomic<bool> hw_good_flag = false;
     std::atomic<int> overflow_counter = 0;
     std::atomic<uint32_t> total_sample_count = 0;
@@ -189,7 +205,7 @@ public:
         return sample_queue.count();
     }
 
-    std::optional<std::tuple<int16_t, int16_t, int16_t>> get_sample() {
+    std::optional<std::tuple<int16_t, int16_t, int16_t, int32_t, int32_t, int32_t>> get_sample() {
         if (sample_queue.isEmpty()) {
             return std::nullopt;
         }
@@ -219,7 +235,7 @@ public:
             int16_t buf[3];
             lis2dh12_acceleration_raw_get(&stlib_context, buf);
             total_sample_count++;
-            if (!sample_queue.enqueue(std::make_tuple(buf[0], buf[1], buf[2]))) {
+            if (!sample_queue.enqueue(std::make_tuple(buf[0], buf[1], buf[2], 0, 0, 0))) {
                 overflow_counter++;
             }
         }
@@ -279,6 +295,10 @@ public:
         if (pending_request == Request::status) {
             auto status = std::bit_cast<lis2dh12_status_reg_t>(dma_buffer[1]);
             if (status.zyxda) {
+                m_previous_pos = m_current_pos;
+                for (uint8_t axis = X_AXIS; axis <= Z_AXIS; ++axis) {
+                    m_current_pos.pos[axis] = Stepper::position(static_cast<AxisEnum>(axis));
+                }
                 request_sample_async();
             } else {
                 finalize_async_request_chain();
@@ -292,10 +312,10 @@ public:
         }
 
         if (pending_request == Request::sample) {
-            int16_t x = (int16_t(dma_buffer[2]) << 8) | dma_buffer[1];
-            int16_t y = (int16_t(dma_buffer[4]) << 8) | dma_buffer[3];
-            int16_t z = (int16_t(dma_buffer[6]) << 8) | dma_buffer[5];
-            if (!sample_queue.enqueue(std::make_tuple(x, y, z))) {
+            int16_t x_acc = (int16_t(dma_buffer[2]) << 8) | dma_buffer[1];
+            int16_t y_acc = (int16_t(dma_buffer[4]) << 8) | dma_buffer[3];
+            int16_t z_acc = (int16_t(dma_buffer[6]) << 8) | dma_buffer[5];
+            if (!sample_queue.enqueue(std::make_tuple(x_acc, y_acc, z_acc, m_previous_pos.x, m_previous_pos.y, m_previous_pos.z))) {
                 overflow_counter++;
             }
             total_sample_count++;
