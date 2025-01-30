@@ -194,8 +194,8 @@ private:
 };
 
 struct SweepParams {
-	float start_frequency = .5f;
-	float end_frequency = .150f;
+	float start_frequency = 5.f;
+	float end_frequency = 150.f;
 	float frequency_multiplier = 1.00365308745f;
     /// How much we're exciting the vibrations, in m/s^2.
     float excitation_acceleration = 2.5f;
@@ -969,8 +969,8 @@ void GcodeSuite::M961() {
     MicrostepRestorer microstepRestorer;
 
     SweepParams args {
-    	.start_frequency = .5f,
-    	.end_frequency = .150f,
+    	.start_frequency = 5.f,
+    	.end_frequency = 150.f,
     	.frequency_multiplier = 1.00365308745f,
         .excitation_acceleration = 2.5f,
         .min_excitation_amplitude = 0,
