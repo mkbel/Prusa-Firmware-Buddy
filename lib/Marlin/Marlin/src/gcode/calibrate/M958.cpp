@@ -208,7 +208,6 @@ struct SweepParams {
     float step_len = NAN;
 
     StepEventFlag_t axis_flag;
-
     /// @retval false on failure
     bool setup(const MicrostepRestorer &microstep_restorer);
 };
@@ -970,6 +969,11 @@ void GcodeSuite::M961() {
     MicrostepRestorer microstepRestorer;
 
     SweepParams args {
+    	.start_frequency = .5f,
+    	.end_frequency = .150f,
+    	.frequency_multiplier = 1.00365308745f,
+        .excitation_acceleration = 2.5f,
+        .min_excitation_amplitude = 0,
         .axis_flag = setup_axis(), // modifies mres as a side-effect
     };
 
