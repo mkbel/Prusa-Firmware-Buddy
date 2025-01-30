@@ -716,6 +716,7 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
  */
 static void sweep(const SweepParams &args) {
 
+    uint8_t counter_256 = 1;
     bool do_once = true; // Do once after step buffer is refilled
     phase_stepping::assert_disabled();
 
@@ -761,7 +762,9 @@ static void sweep(const SweepParams &args) {
     					break;
     				}
     				case PrusaAccelerometer::GetSampleResult::buffer_empty: {
-    					idle(true, true);
+    					if(!counter_256) idle(true, true);
+    					else delay(1);
+    					++counter_256;
     					break;
     				}
                 }
