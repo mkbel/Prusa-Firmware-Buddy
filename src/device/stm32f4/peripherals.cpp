@@ -938,7 +938,7 @@ void hw_tim9_init() {
     htim9.Instance = TIM9;
     htim9.Init.Prescaler = 1680 - 1; // 100kHz
     htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim9.Init.Period = 33 - 1; // ~3 kHz
+    htim9.Init.Period = 8 - 1; // 12.5 kHz
     htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     if (HAL_TIM_Base_Init(&htim9) != HAL_OK) {
         Error_Handler();

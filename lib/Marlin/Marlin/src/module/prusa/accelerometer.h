@@ -27,6 +27,7 @@ class PrusaAccelerometer {
 public:
     struct Acceleration {
         int16_t val[3];
+        uint32_t timestamp;
         int32_t pos[3];
     };
 

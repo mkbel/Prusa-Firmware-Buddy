@@ -79,7 +79,8 @@ PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(Acceleration 
     if (!sample.has_value()) {
         return GetSampleResult::buffer_empty;
     }
-    auto [acc_x, acc_y, acc_z, pos_x, pos_y, pos_z] = *sample;
+    auto [acc_x, acc_y, acc_z, timestamp, pos_x, pos_y, pos_z] = *sample;
+    acceleration.timestamp = timestamp;
     acceleration.val[0] = raw_to_accel(acc_x);
     acceleration.val[1] = raw_to_accel(acc_y);
     acceleration.val[2] = raw_to_accel(acc_z);
