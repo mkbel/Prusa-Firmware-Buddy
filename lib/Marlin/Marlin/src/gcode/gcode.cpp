@@ -916,7 +916,9 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 958: M958(); break;
         case 959: M959(); break;
       #endif
-
+      #if HAS_LOCAL_ACCELEROMETER()
+        case 961: M961(); break;
+      #endif
       #if HAS_PHASE_STEPPING()
         case 970: M970(); break;
         case 972: M972(); break;

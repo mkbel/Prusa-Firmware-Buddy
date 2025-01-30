@@ -192,6 +192,26 @@ private:
     float m_frequency_step;
     size_t m_size;
 };
+
+struct SweepParams {
+	float start_frequency = .5f;
+	float end_frequency = .150f;
+	float frequency_multiplier = 1.00365308745f;
+    /// How much we're exciting the vibrations, in m/s^2.
+    float excitation_acceleration = 2.5f;
+
+    /// How much we're exciting the vibrations, in meters.
+    /// Alternative to using \p excitation_acceleration.
+    float min_excitation_amplitude = 0;
+
+    /// Configured automatically in setup()
+    float step_len = NAN;
+
+    StepEventFlag_t axis_flag;
+
+    /// @retval false on failure
+    bool setup(const MicrostepRestorer &microstep_restorer);
+};
 } // anonymous namespace
 
 static bool is_full() {
@@ -374,6 +394,14 @@ AxisEnum get_logical_axis(const uint16_t axis_flag) {
 }
 
 bool VibrateMeasureParams::setup(const MicrostepRestorer &microstep_restorer) {
+    step_len = get_step_len(axis_flag, microstep_restorer.saved_mres());
+    if (isnan(step_len)) {
+        return false;
+    }
+    return true;
+}
+
+bool SweepParams::setup(const MicrostepRestorer &microstep_restorer) {
     step_len = get_step_len(axis_flag, microstep_restorer.saved_mres());
     if (isnan(step_len)) {
         return false;
@@ -680,6 +708,71 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
     return result;
 }
 
+
+/**
+ * @brief do frequency sweep
+ *
+ *
+ *
+ */
+static void sweep(const SweepParams &args) {
+
+    bool do_once = true; // Do once after step buffer is refilled
+    phase_stepping::assert_disabled();
+
+    FourierSeries3d fourier(1);
+    PrusaAccelerometer accelerometer;
+    if (accelerometer.report_error(print_accelerometer_error)) {
+        return;
+    }
+
+    TEMPORARY_AUTO_REPORT_OFF(suspend_auto_report);
+#ifdef FOURIER_SERIES_OUTPUT_SAMPLES
+    SERIAL_ECHOLN("Timestamp[us] Ax Ay Az[2g/515div] Posx Posy Posz[1/128 full steps]");
+#endif
+
+    for(float requested_frequency = args.start_frequency; requested_frequency < args.end_frequency; requested_frequency *= args.frequency_multiplier) {
+        const float excitation_amplitude =
+        		HarmonicGenerator::amplitudeNotRounded(requested_frequency, args.excitation_acceleration) > args.min_excitation_amplitude ?
+        				HarmonicGenerator::amplitudeNotRounded(requested_frequency, args.excitation_acceleration) :
+    					args.min_excitation_amplitude;
+        HarmonicGenerator generator(requested_frequency, excitation_amplitude, args.step_len);
+        StepDir stepDir(generator);
+
+        GcodeSuite::reset_stepper_timeout();
+        const uint32_t steps_to_do = generator.getStepsPerPeriod();
+
+        for (uint32_t step_nr = 0; step_nr < steps_to_do; ++step_nr) {
+            const StepDir::RetVal step_dir = stepDir.get();
+
+            while (is_full()) {
+                if (do_once) {
+                    accelerometer.clear();
+                    do_once = false;
+                }
+                PrusaAccelerometer::Acceleration measured_acceleration;
+
+                switch(accelerometer.get_sample(measured_acceleration)) {
+    				case PrusaAccelerometer::GetSampleResult::error: {
+    					accelerometer.report_error(print_accelerometer_error);
+    					return;
+    				}
+    				case PrusaAccelerometer::GetSampleResult::ok: {
+    					(void)fourier.add_sample(.0f, measured_acceleration);
+    					break;
+    				}
+    				case PrusaAccelerometer::GetSampleResult::buffer_empty: {
+    					idle(true, true);
+    					break;
+    				}
+                }
+                metric_record_float(&metric_excite_freq, requested_frequency);
+            }
+            enqueue_step(step_dir.step_us, step_dir.dir, args.axis_flag);
+        }
+    }
+}
+
 /**
  * @brief Excite harmonic vibration and measure amplitude, repeat on failure
  *
@@ -857,6 +950,43 @@ static bool idle_progress_hook(const VibrateMeasureProgressHookParams &) {
  */
 
 /**
+ *### Excite harmonic vibration sweep and output samples
+ *
+ *
+ *#### Usage
+ *
+ *    M958 [ X | Y | Z | A ]
+ *
+ *#### Parameters
+ *
+ * - `X` - Vibrate with X(A) motor, start in direction 1 or -1
+ * - `Y` - Vibrate with Y(B) motor, start in direction 1 or -1
+ * - `Z` - Vibrate with Z motor, start in direction 1 or -1
+ * - `A` - Acceleration
+ */
+void GcodeSuite::M961() {
+    // phstep needs to be off _before_ getting the current ustep resolution
+    phase_stepping::EnsureDisabled phaseSteppingDisabler;
+    MicrostepRestorer microstepRestorer;
+
+    SweepParams args {
+        .axis_flag = setup_axis(), // modifies mres as a side-effect
+    };
+
+    if (parser.seenval('A')) {
+        args.excitation_acceleration = abs(parser.value_float()) * 0.001f;
+    }
+
+    if (!args.setup(microstepRestorer)) {
+        return;
+    }
+
+    sweep(args);
+}
+
+
+#if HAS_LOCAL_ACCELEROMETER()
+/**
  *### M958: Excite harmonic vibration <a href="https://reprap.org/wiki/G-code#M958:_Excite_harmonic_vibration">M958: Excite harmonic vibration</a>
  *
  * Only MK3.5/S, MK3.9/S, MK4/S, XL and iX
@@ -916,6 +1046,7 @@ void GcodeSuite::M958() {
     serial_echo_header(args.klipper_mode);
     vibrate_measure_repeat(args, frequency, idle_progress_hook);
 }
+#endif
 
 /** @}*/
 
