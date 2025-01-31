@@ -196,7 +196,7 @@ private:
 struct SweepParams {
 	float start_frequency = 5.f;
 	float end_frequency = 150.f;
-	float frequency_multiplier = 1.00365308745f;
+	float frequency_addend = .02f;
     /// How much we're exciting the vibrations, in m/s^2.
     float excitation_acceleration = 2.5f;
 
@@ -731,7 +731,7 @@ static void sweep(const SweepParams &args) {
     SERIAL_ECHOLN("Timestamp[us] Ax Ay Az[2g/515div] Posx Posy Posz[1/128 full steps]");
 #endif
 
-    for(float requested_frequency = args.start_frequency; requested_frequency < args.end_frequency; requested_frequency *= args.frequency_multiplier) {
+    for(float requested_frequency = args.start_frequency; requested_frequency < args.end_frequency; requested_frequency += args.frequency_addend) {
         const float excitation_amplitude =
         		HarmonicGenerator::amplitudeNotRounded(requested_frequency, args.excitation_acceleration) > args.min_excitation_amplitude ?
         				HarmonicGenerator::amplitudeNotRounded(requested_frequency, args.excitation_acceleration) :
@@ -974,7 +974,7 @@ void GcodeSuite::M961() {
     SweepParams args {
     	.start_frequency = 5.f,
     	.end_frequency = 150.f,
-    	.frequency_multiplier = 1.00365308745f,
+    	.frequency_addend = .02f,
         .excitation_acceleration = 2.5f,
         .min_excitation_amplitude = 0,
         .axis_flag = setup_axis(), // modifies mres as a side-effect
