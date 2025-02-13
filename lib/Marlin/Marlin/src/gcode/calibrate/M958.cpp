@@ -954,17 +954,20 @@ static bool idle_progress_hook(const VibrateMeasureProgressHookParams &) {
 /**
  *### Excite harmonic vibration sweep and output samples
  *
- *
- *#### Usage
- *
- *    M958 [ X | Y | Z | A ]
+ *	Combination of too low frequency and too high acceleration
+ *	may lead to insufficient CPU power to generate steps and
+ *	read samples in time.
  *
  *#### Parameters
  *
  * - `X` - Vibrate with X(A) motor, start in direction 1 or -1
  * - `Y` - Vibrate with Y(B) motor, start in direction 1 or -1
  * - `Z` - Vibrate with Z motor, start in direction 1 or -1
- * - `A` - Acceleration
+ * - `A` - Acceleration in mm/s^2 (2500 mm/s^2 = 2.5 m/s^2 when omitted)
+ * - `F` - Start frequency (5Hz when omitted)
+ * - `G` - End frequency (150Hz when omitted)
+ * - `H` - Frequency step (0.02Hz when omitted)
+ *
  */
 void GcodeSuite::M961() {
     // phstep needs to be off _before_ getting the current ustep resolution
@@ -982,6 +985,15 @@ void GcodeSuite::M961() {
 
     if (parser.seenval('A')) {
         args.excitation_acceleration = abs(parser.value_float()) * 0.001f;
+    }
+    if (parser.seenval('F')) {
+    	args.start_frequency = abs(parser.value_float());
+    }
+    if (parser.seenval('G')) {
+    	args.end_frequency = abs(parser.value_float());
+    }
+    if (parser.seenval('H')) {
+    	args.frequency_addend = parser.value_float();
     }
 
     if (!args.setup(microstepRestorer)) {
