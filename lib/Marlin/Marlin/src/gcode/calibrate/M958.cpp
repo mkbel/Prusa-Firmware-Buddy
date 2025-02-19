@@ -967,7 +967,7 @@ static bool idle_progress_hook(const VibrateMeasureProgressHookParams &) {
  * - `F` - Start frequency (5Hz when omitted)
  * - `G` - End frequency (150Hz when omitted)
  * - `H` - Frequency step (0.02Hz when omitted)
- *
+ * - `M` - Min amplitude in mm (0 mm rounded up to 1/128 step when omitted)
  */
 void GcodeSuite::M961() {
     // phstep needs to be off _before_ getting the current ustep resolution
@@ -994,6 +994,9 @@ void GcodeSuite::M961() {
     }
     if (parser.seenval('H')) {
     	args.frequency_addend = parser.value_float();
+    }
+    if (parser.seenval('M')) {
+    	args.min_excitation_amplitude = parser.value_float() * 0.001f;
     }
 
     if (!args.setup(microstepRestorer)) {
