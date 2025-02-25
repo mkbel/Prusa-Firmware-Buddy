@@ -838,16 +838,6 @@ static StepEventFlag_t setup_axis() {
         axis_flag = StepEventFlag::STEP_EVENT_FLAG_STEP_X;
     }
 
-#if ENABLED(COREXY)
-    // For Core XY, X and Y are actually A and B motors, so we need to use both
-    // and for Y axis reverse the B direction
-    if (axis_flag == StepEventFlag::STEP_EVENT_FLAG_STEP_X) {
-        axis_flag |= StepEventFlag::STEP_EVENT_FLAG_STEP_Y;
-    } else if (axis_flag == StepEventFlag::STEP_EVENT_FLAG_STEP_Y) {
-        axis_flag |= StepEventFlag::STEP_EVENT_FLAG_STEP_X | StepEventFlag::STEP_EVENT_FLAG_Y_DIR;
-    }
-#endif
-
     if (axis_flag & STEP_EVENT_FLAG_STEP_X) {
         stepper_microsteps(X_AXIS, 128);
     }
