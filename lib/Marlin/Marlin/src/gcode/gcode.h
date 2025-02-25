@@ -1045,7 +1045,9 @@ private:
   static void M958();
   static void M959();
 #endif
-
+#if HAS_LOCAL_ACCELEROMETER()
+  static void M961();
+#endif
 #if HAS_PHASE_STEPPING()
   static void M970();
   static void M972();
